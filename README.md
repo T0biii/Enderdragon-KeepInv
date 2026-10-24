@@ -7,7 +7,7 @@ A [Paper](https://papermc.io) plugin by **T0biii**: while the Ender Dragon is al
 - Activates automatically on first dragon spawn and on every respawn
 - State survives restarts
 - Console notice when a new GitHub release is available (`update-checker.enabled`)
-- [bStats](https://bstats.org) metrics, disable with `metrics.enabled: false`
+- [bStats](https://bstats.org) metrics ([public stats](https://bstats.org/plugin/bukkit/Enderdragon%20KeepInv/34925)), disable with `metrics.enabled: false`
 
 Requires Paper 26.1+ and Java 25. See [`docs/modrinth`](docs/modrinth) for the Modrinth listing texts and icon.
 
@@ -38,7 +38,7 @@ The tag (without `v`) becomes the plugin version. Tags with a suffix (`v1.1.0-be
 
 ## bStats
 
-Set the service id in `EnderDragonKeepInv.java` (`BSTATS_ID`). While it is `0`, bStats is not started.
+The plugin reports anonymous usage statistics to [bStats](https://bstats.org/plugin/bukkit/Enderdragon%20KeepInv/34925) (service id `34925`, set in `EnderDragonKeepInv.java` as `BSTATS_ID`). Server owners can opt out with `metrics.enabled: false` in the plugin config or globally in `plugins/bStats/config.yml`.
 
 ## License
 
