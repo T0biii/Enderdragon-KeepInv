@@ -68,4 +68,11 @@ jobs:
         with:
           files: dist/*.jar
           generate_release_notes: true
+          draft: true
           prerelease: ${{ contains(github.ref_name, '-') }}
+
+      # Immutable releases require all assets to be attached before the release is published.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false
