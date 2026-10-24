@@ -17,13 +17,23 @@ fi
 IMAGE="${SMOKE_IMAGE:-eclipse-temurin:25-jdk}"
 NAME="edki-smoke-$$"
 WORK="build/smoke"
+LOGS="build/smoke-logs"
 PLUGIN="EnderDragonKeepInv"
 
 log() { echo "[smoke] $*"; }
 server_log() { docker logs "$NAME" 2>&1; }
 
+collect_logs() {
+  mkdir -p "$LOGS"
+  server_log > "$LOGS/console.log" 2>&1 || true
+  docker cp "$NAME:/srv/logs" "$LOGS/logs" >/dev/null 2>&1 || true
+  docker cp "$NAME:/srv/plugins/$PLUGIN" "$LOGS/plugin-data" >/dev/null 2>&1 || true
+  echo "$MC_VERSION" > "$LOGS/paper-version.txt"
+}
+
 cleanup() {
   status=$?
+  collect_logs
   if [[ $status -ne 0 ]]; then
     echo "::group::Server log"
     server_log | tail -n 150 || true
@@ -63,7 +73,7 @@ build_json="$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/$MC
 paper_url="$(printf '%s' "$build_json" | grep -Eo 'https://[^"]+\.jar' | head -n 1)"
 [[ -n "$paper_url" ]] || fail "no download url for Paper $MC_VERSION"
 
-rm -rf "$WORK"
+rm -rf "$WORK" "$LOGS"
 mkdir -p "$WORK/plugins"
 curl -fsSL "$paper_url" -o "$WORK/paper.jar"
 cp "$JAR" "$WORK/plugins/"
@@ -98,4 +108,5 @@ fi
 log "Stopping server"
 docker exec "$NAME" sh -c "echo stop >> /tmp/in"
 wait_for 'Closing Server|Stopping server' 60
+timeout 60 docker wait "$NAME" >/dev/null || true
 log "OK: $PLUGIN works on Paper $MC_VERSION"

@@ -45,3 +45,11 @@ jobs:
 
       - name: Run smoke test
         run: scripts/smoke-test.sh "$(ls dist/*.jar | head -n 1)" "${{ inputs.minecraft-version }}"
+
+      - name: Upload server logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-test-server-logs
+          path: build/smoke-logs
+          if-no-files-found: warn
