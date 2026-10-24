@@ -23,6 +23,14 @@ PLUGIN="EnderDragonKeepInv"
 log() { echo "[smoke] $*"; }
 server_log() { docker logs "$NAME" 2>&1; }
 
+# grep -q closes the pipe early, which makes the upstream command fail under pipefail,
+# so always capture the log first.
+log_has() {
+  local pattern="$1" offset="${2:-0}" content
+  content="$(server_log | tail -n +"$((offset + 1))")" || true
+  grep -Eq "$pattern" <<<"$content"
+}
+
 collect_logs() {
   mkdir -p "$LOGS"
   server_log > "$LOGS/console.log" 2>&1 || true
@@ -49,7 +57,7 @@ fail() { echo "[smoke] FAILED: $*" >&2; exit 1; }
 # Waits until the pattern shows up in the server log after the given line offset.
 wait_for() {
   local pattern="$1" timeout="$2" offset="${3:-0}" waited=0
-  while ! server_log | tail -n +"$((offset + 1))" | grep -Eq "$pattern"; do
+  while ! log_has "$pattern" "$offset"; do
     if [[ "$(docker inspect -f '{{.State.Running}}' "$NAME")" != "true" ]]; then
       fail "server exited while waiting for: $pattern"
     fi
@@ -87,8 +95,8 @@ docker cp "$WORK/." "$NAME:/srv/"
 docker start "$NAME" >/dev/null
 
 wait_for 'Done \(' 300
-server_log | grep -q "Enabling $PLUGIN" || fail "$PLUGIN was not enabled"
-if server_log | grep -Eq "Could not load .*$PLUGIN|Error occurred while enabling $PLUGIN|Disabling $PLUGIN"; then
+log_has "Enabling $PLUGIN" || fail "$PLUGIN was not enabled"
+if log_has "Could not load .*$PLUGIN|Error occurred while enabling $PLUGIN|Disabling $PLUGIN"; then
   fail "$PLUGIN failed to load"
 fi
 log "Plugin enabled"
@@ -100,8 +108,9 @@ run_command 'edki status' 'keep inventory is ACTIVE'
 run_command 'execute in minecraft:the_end run kill @e[type=minecraft:ender_dragon]' 'Killed'
 run_command 'edki status' 'keep inventory is inactive'
 
-if server_log | grep -Eq "Exception|\[$PLUGIN\].*(ERROR|SEVERE)"; then
-  server_log | grep -E "Exception|\[$PLUGIN\].*(ERROR|SEVERE)" | head -n 10
+errors="$(server_log | grep -E "Exception|\[$PLUGIN\].*(ERROR|SEVERE)" || true)"
+if [[ -n "$errors" ]]; then
+  echo "$errors" | head -n 10
   fail "errors found in the server log"
 fi
 
