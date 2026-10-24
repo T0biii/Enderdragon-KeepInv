@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.4
+
+- Release workflow skips already published releases.
+
 ## 0.0.2
 
 - Added bStats service id.

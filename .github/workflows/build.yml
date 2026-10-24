@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -57,13 +61,23 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check for existing release
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          published=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft -q "select(.isDraft == false) | \"yes\"" 2>/dev/null || true)
+          echo "published=$published" >> "$GITHUB_OUTPUT"
+
       - name: Download plugin jar
+        if: steps.existing.outputs.published != 'yes'
         uses: actions/download-artifact@v8
         with:
           name: EnderDragonKeepInv
           path: dist
 
       - name: Create GitHub release
+        if: steps.existing.outputs.published != 'yes'
         uses: softprops/action-gh-release@v3
         with:
           files: dist/*.jar
@@ -73,6 +87,7 @@ jobs:
 
       # Immutable releases require all assets to be attached before the release is published.
       - name: Publish release
+        if: steps.existing.outputs.published != 'yes'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false
