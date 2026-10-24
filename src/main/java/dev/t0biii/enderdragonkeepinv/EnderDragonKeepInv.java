@@ -7,7 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class EnderDragonKeepInv extends JavaPlugin {
 
     /** bStats service id. While this is 0, bStats is not started at all. */
-    private static final int BSTATS_ID = 0;
+    private static final int BSTATS_ID = 34925;
 
     private static final String GITHUB_REPOSITORY = "T0biii/Enderdragon-KeepInv";
     private static final long UPDATE_CHECK_INTERVAL_TICKS = 12L * 60 * 60 * 20;
