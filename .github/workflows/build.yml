@@ -54,9 +54,15 @@ jobs:
           path: dist/*.jar
           if-no-files-found: error
 
+  smoke-test:
+    needs: build
+    uses: ./.github/workflows/smoke-test.yml
+    with:
+      use-build-artifact: true
+
   release:
     if: github.ref_type == 'tag'
-    needs: build
+    needs: [build, smoke-test]
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -25,6 +25,14 @@ The jar ends up in `dist/`. To set a specific version:
 docker build --target artifact --build-arg VERSION=1.2.3 --output type=local,dest=dist .
 ```
 
+## Smoke test
+
+After every build a real Paper server is started in Docker, the built jar is loaded and the dragon logic is checked (spawn, `/edki status`, kill). It runs automatically as part of the `Build` workflow (a release is only created if it passes) and can be started manually via **Actions > Smoke Test > Run workflow**, optionally with a different Minecraft version. Locally:
+
+```bash
+scripts/smoke-test.sh dist/EnderDragonKeepInv-<version>.jar [minecraft-version]
+```
+
 ## Releases
 
 Every push and pull request builds the plugin via GitHub Actions and attaches the jar as workflow artifact. Pushing a tag creates a GitHub release with the jar attached:

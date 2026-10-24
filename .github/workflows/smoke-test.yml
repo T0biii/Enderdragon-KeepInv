@@ -1,0 +1,47 @@
+name: Smoke Test
+
+# Starts a real Paper server in Docker, loads the plugin and checks that it works.
+# Runs after every build and can be started manually (builds the current ref itself).
+
+on:
+  workflow_call:
+    inputs:
+      use-build-artifact:
+        description: Test the jar from the build job instead of building it again
+        type: boolean
+        default: false
+      minecraft-version:
+        description: Minecraft/Paper version (empty = version the plugin is compiled against)
+        type: string
+        default: ""
+  workflow_dispatch:
+    inputs:
+      minecraft-version:
+        description: Minecraft/Paper version, e.g. 26.3 (empty = version the plugin is compiled against)
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download plugin jar from build
+        if: inputs.use-build-artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: EnderDragonKeepInv
+          path: dist
+
+      - name: Build plugin (Docker)
+        if: ${{ !inputs.use-build-artifact }}
+        run: docker build --target artifact --output type=local,dest=dist .
+
+      - name: Run smoke test
+        run: scripts/smoke-test.sh "$(ls dist/*.jar | head -n 1)" "${{ inputs.minecraft-version }}"
