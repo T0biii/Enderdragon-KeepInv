@@ -1,0 +1,65 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+].+)?$ ]]; then
+              echo "Tag '$GITHUB_REF_NAME' is not a valid version tag (expected vMAJOR.MINOR.PATCH)" >&2
+              exit 1
+            fi
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build plugin (Docker)
+        run: docker build --target artifact --build-arg "VERSION=${{ steps.version.outputs.version }}" --output type=local,dest=dist .
+
+      - name: List artifacts
+        run: ls -l dist
+
+      - name: Upload plugin jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: EnderDragonKeepInv
+          path: dist/*.jar
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download plugin jar
+        uses: actions/download-artifact@v8
+        with:
+          name: EnderDragonKeepInv
+          path: dist
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*.jar
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}

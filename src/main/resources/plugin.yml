@@ -1,0 +1,17 @@
+name: EnderDragonKeepInv
+version: '${version}'
+main: dev.t0biii.enderdragonkeepinv.EnderDragonKeepInv
+api-version: '26.1'
+author: T0biii
+website: https://github.com/T0biii/Enderdragon-KeepInv
+description: Enables keep inventory for everyone while the Ender Dragon is alive.
+commands:
+  enderdragonkeepinv:
+    description: Shows the plugin status, reloads the config or resets dragon tracking.
+    usage: /<command> <status|reload|reset>
+    aliases: [edki]
+    permission: enderdragonkeepinv.admin
+permissions:
+  enderdragonkeepinv.admin:
+    description: Allows use of /enderdragonkeepinv.
+    default: op

@@ -1,0 +1,14 @@
+[versions]
+paper = "26.3.build.222-stable"
+bstats = "3.2.1"
+shadow = "9.6.1"
+junit = "6.1.3"
+
+[libraries]
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+bstats-bukkit = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
+
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

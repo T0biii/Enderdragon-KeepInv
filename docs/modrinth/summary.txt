@@ -1,0 +1,1 @@
+Everyone keeps their inventory and XP when dying - but only while the Ender Dragon is alive. Server-side Paper plugin, zero setup.

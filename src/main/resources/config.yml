@@ -1,0 +1,16 @@
+# EnderDragonKeepInv by T0biii
+# While at least one Ender Dragon is alive, every player keeps their inventory on death.
+
+keep-inventory:
+  # Also keep experience levels (like the vanilla keepInventory gamerule does).
+  keep-level: true
+
+update-checker:
+  # Log a message to the console when a newer release exists on GitHub.
+  # Requires a restart to take effect.
+  enabled: true
+
+metrics:
+  # Anonymous usage statistics via bStats (https://bstats.org).
+  # Set to false to disable. Requires a restart to take effect.
+  enabled: true

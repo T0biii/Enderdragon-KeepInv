@@ -1,0 +1,10 @@
+# Changelog
+
+## 1.0.0
+
+- Initial release.
+- Keep inventory (and XP) for all players while an Ender Dragon is alive.
+- Dragon state persisted across restarts.
+- GitHub update checker (console message), configurable.
+- bStats metrics, configurable.
+- Commands: `/enderdragonkeepinv status|reload|reset`.
